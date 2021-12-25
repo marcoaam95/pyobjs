@@ -75,4 +75,4 @@ class Object(dict):
         super().__delitem__(_key)
 
     def __str__(self):
-        return json.dumps(self)
+        return json.dumps(super().__str__())
