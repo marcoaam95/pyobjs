@@ -1,63 +1,68 @@
+from __future__ import annotations
+from typing import Iterable
+import json
+
 class Object(dict):
 
     def __init__(self, **kwargs):
 
+        super().__init__()
+
         for k, v in kwargs.items():
+            v = Object.__assign_object(v)
             Object.__setattr__(self, k, v)
 
-    def __repr__(self):
-        '''
-            Prints dictionary as a string.
-        '''
-        return ', '.join([f'{k}:{v}' for k, v in self.__dict__.items()])
+    @staticmethod
+    def __assign_object(_value):
 
-    def __contains__(self, _value):
-        '''
-            Check if exists an attribute _value into the class.
-            Args:
-                _value (str) --> key to search for into attributes list.
-        '''
-        return _value in self.__dict__.keys()
+        if isinstance(_value, dict):
+            # dictionaries are converted into object and processed recursively
+            _value = Object(**_value)
+            for k, v in _value.items():
+                _value[k] = Object.__assign_object(v)
 
-    def __getitem__(self, _key):
-        '''
-            Same as __getattr__.
-        '''
-        return Object.__getattr__(self, _key)
+        elif type(_value) == str:
+            # string is iterable but don't need to iterate recursively
+            pass
+
+        elif isinstance(_value, Iterable):
+
+            # idx to use if needed
+            v_range = range(0, len(_value)+1)
+
+            for idx, item in zip(v_range, _value):
+
+                # item assignation ecursively if needed
+                item = Object.__assign_object(item)
+
+                # distinct types of assignation depending of object type
+                if type(_value) == list:
+                    _value[idx] = item
+
+                elif type(_value) == set:
+                    _value.add(item)
+
+        return _value
 
     def __getattr__(self, _key):
         '''
-            Returns value contained in _key attribute, else None.
+            Extends dictionary to get key:value pairs with attribute notation self._key
             Args:
                 _key (str): attribute from which we want to get value.
+            Return:
+                Structure contained in attr or None if does not exist.
         '''
-        ins_dict = self.__dict__
-        x = ins_dict[_key] if _key in ins_dict.keys() else None
-        return x
-
-    def __setitem__(self, _key, _value):
-        '''
-            Same as __setattr__.
-        '''
-        Object.__setattr__(self, _key, _value)
+        return super().get(_key)
 
     def __setattr__(self, _key, _value):
         '''
-            Sets a new key:value pair with _key:_value values.
+            Sets a new key:value pair with _key:_value values. It performs the operations recursively.
             Args:
                 _key (str): name of the new attr. If exists, old value is overriden.
-                _value (Any): any value to assign to attribute with name _key.
-            Notes:
-                1. If _value is of type 'dict', a new instance of Object (this class) is created as value of key:value pair.
+                _value (Any): any structure to assign to attribute with name _key.
         '''
-        _value = Object(**_value) if isinstance(_value, dict) else _value
-        self.__dict__[_key] = _value
-
-    def __delitem__(self, _key):
-        '''
-            Same as __delattr__.
-        '''
-        Object.__delattr__(self, _key)
+        _value = Object.__assign_object(_value)
+        super().__setitem__(_key, _value)
 
     def __delattr__(self, _key):
         '''
@@ -67,29 +72,7 @@ class Object(dict):
             Notes:
                 1. If value of attribute _key is an Object, this function deletes recursively all its elements.
         '''
-        if _key in self:
+        super().__delitem__(_key)
 
-            _item = self[_key]
-
-            # if attr is an object we need to delte it recursively
-            if isinstance(_item, Object):
-                for k in list(_item.__dict__.keys()):
-                    Object.__delattr__(_item, k)
-
-            # Finally delete the main element, Object or not
-            del self.__dict__[_key]
-
-    def __del__(self):
-        '''
-            Deletes all attributes of the insatnce.
-            Notes:
-                1. Deletion consists of deleting all attributes individually and finally deleting the instance structure.
-        '''
-        ins_dict: dict = self.__dict__
-        ins_items: list = list(ins_dict.items())
-
-        # iterate each value and if is Object deletes it
-        for attr, obj in ins_items:
-            Object.__delattr__(self, attr)
-
-        del self
+    def __str__(self):
+        return json.dumps(self)
