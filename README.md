@@ -2,8 +2,6 @@
 
 The objective of this repository is to implement a series of classes that allow us to emulate the structure notation of Javascript.
 
-
-
 ## **Object**
 
 This class implements modifications of Python dictionaries to allow JS Object-like notation to assign an retrieve information.
@@ -45,13 +43,13 @@ Nested elements:
 obj.dogs = [
     {'name': 'Maya', 'size': 'big', 'height': 100},
     {'name': 'Max', 'size': 'tiny', 'height': 40},
-    {'name': 'Connor', 'size': 'mid', 'height': 60, 'awards': [('Mid Dog Award', '21/08/2019')]}
+    {'name': 'Connor', 'size': 'mid', 'height': 60, 'awards': [('Mid Dog Award', '2019/08/21')]}
 ]
 
 print(obj)
 ```
 ```
-{"name": "John", "surname": "Smith", "age": 39, "height": 175, "city": "Madrid", "dogs": [{"name": "Maya", "size": "big", "height": 100}, {"name": "Max", "size": "tiny", "height": 35}, {"name": "Connor", "size": "mid", "height": 60, "awards": [["Mid Dog Award", "21/08/2019"]]}]}
+{"name": "John", "surname": "Smith", "age": 39, "height": 175, "city": "Madrid", "dogs": [{"name": "Maya", "size": "big", "height": 100}, {"name": "Max", "size": "tiny", "height": 35}, {"name": "Connor", "size": "mid", "height": 60, "awards": [("Mid Dog Award", "2019/08/21")]}]}
 ```
 
 \
