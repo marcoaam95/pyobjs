@@ -9,14 +9,29 @@ class Object(dict):
         super().__init__()
 
         for k, v in kwargs.items():
-            v = Object.__assign_object(v)
             Object.__setattr__(self, k, v)
+
+    @staticmethod
+    def is_iterable(_value):
+        try:
+            iter(_value)
+            return True
+        except TypeError:
+            return False
+
+    @staticmethod
+    def is_mutable(_value):
+        try:
+            _value.__setitem__
+            return True
+        except AttributeError:
+            return False
 
     @staticmethod
     def __assign_object(_value):
 
         if isinstance(_value, dict):
-            # dictionaries are converted into object and processed recursively
+            # direct instances of dict are converted into object and processed recursively
             _value = Object(**_value)
             for k, v in _value.items():
                 _value[k] = Object.__assign_object(v)
@@ -25,22 +40,12 @@ class Object(dict):
             # string is iterable but don't need to iterate recursively
             pass
 
-        elif isinstance(_value, Iterable):
+        elif Object.is_iterable(_value) and Object.is_mutable(_value):
+            # for iterable and mutable object we are going to check if they have more dict classes (or child) recursively
 
-            # idx to use if needed
-            v_range = range(0, len(_value)+1)
-
-            for idx, item in zip(v_range, _value):
-
+            for idx, item in enumerate(_value):
                 # item assignation ecursively if needed
-                item = Object.__assign_object(item)
-
-                # distinct types of assignation depending of object type
-                if type(_value) == list:
-                    _value[idx] = item
-
-                elif type(_value) == set:
-                    _value.add(item)
+                _value[idx] = Object.__assign_object(item)
 
         return _value
 
@@ -52,7 +57,7 @@ class Object(dict):
             Return:
                 Structure contained in attr or None if does not exist.
         '''
-        return super().get(_key)
+        return self.__getitem__(_key)
 
     def __setattr__(self, _key, _value):
         '''
@@ -62,7 +67,7 @@ class Object(dict):
                 _value (Any): any structure to assign to attribute with name _key.
         '''
         _value = Object.__assign_object(_value)
-        super().__setitem__(_key, _value)
+        self.__setitem__(_key, _value)
 
     def __delattr__(self, _key):
         '''
@@ -72,7 +77,6 @@ class Object(dict):
             Notes:
                 1. If value of attribute _key is an Object, this function deletes recursively all its elements.
         '''
-        super().__delitem__(_key)
+        self.__delitem__(_key)
 
-    def __str__(self):
-        return json.dumps(super().__str__())
+

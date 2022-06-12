@@ -1,15 +1,15 @@
-# **Pyobjs**
+# Pyobjs
 
 The objective of this repository is to implement a series of classes that allow us to emulate the structure notation of Javascript.
 
-## **Object**
+## Object
 
-This class implements modifications of Python dictionaries to allow JS Object-like notation to assign an retrieve information.
+This class implements modifications of Python dictionaries to allow JS Object-like notation to assign an retreive information. It also works for recursive structures converting dictionaries (and child classes) into Object.
+
+### Caveats
+* You should take care about using this class with mutables types stored into tuple, as tuples are not mutables. As an example, this class can't create an `Object` class from a `dict` inside a `tuple` due its inmutability, so it avoid explore data into tuples.
 
 ### How to use
-
-> **_NOTE:_**  When Object is printed, it returns formatted valid JSON string.
-
 
 Creating a new object:
 ```python
@@ -34,7 +34,7 @@ print(obj['city'], obj.height)
 ```
 
 ```
-Madrid 175
+Boston 175
 ```
 
 \
@@ -53,7 +53,7 @@ print(obj)
 ```
 
 \
-We also can get and modify nested attrs:
+We can also get and modify nested attrs:
 ```python
 # Modifying Max height to 35
 obj.dogs[1].height = 35
